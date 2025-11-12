@@ -8,7 +8,7 @@ def display_all_plant(get_conn):
         st.write("The table below displays all the operational powerplants without any filters, some may contain contacts")
         with get_conn() as conn:
             gen_query = """
-            SELECT * FROM public.general_plant_info
+            SELECT plantname, ownername, company_address, company_city, company_state,fuel_type_1, company_url FROM public.general_plant_info
             """
             gen_df = pd.read_sql_query(gen_query, conn)
 
@@ -16,8 +16,8 @@ def display_all_plant(get_conn):
                 gen_df = gen_df.drop(columns=["plant_id","parentname"], errors="ignore")
 
                 gen_df = gen_df.rename(columns={
-                    "ownername":"Owner Name",
                     "plantname":"Plant Name",
+                    "ownername":"Owner Name",
                     "company_address":"Address",
                     "company_city":"City",
                     "company_state":"State",

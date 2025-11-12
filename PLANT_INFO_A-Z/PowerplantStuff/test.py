@@ -1,13 +1,19 @@
+import sys, os
+
+from activity import display_sales_activity
+from all_plants import display_all_plant
+from calldir import call_directory
+from login import logout_user, show_login
+from outtage import display_outtage_comments
 import psycopg2
 import streamlit as st
 import pandas as pd
 import warnings
 import time
-from login import logout_user, show_login
-from calldir import call_directory
-from all_plants import display_all_plant
-from activity import display_sales_activity
 from PIL import Image
+
+
+
 
 #ignore a warning in terminal just tells me to use sqlalchemy
 warnings.filterwarnings("ignore", category=UserWarning, module="psycopg2")
@@ -24,9 +30,6 @@ def get_conn():
     )
 
 
-
-
-# --- Authentication ---
 user = show_login(get_conn)
 
 # --- Sidebar ---
@@ -41,8 +44,7 @@ col1, col2 = st.columns([1,1.5])
 with col1:
     st.markdown("# AFC Power Plant Portal")
 with col2:
-#    st.image("powerplant1.svg",width=80)
-    st.image("powerplant.jpg", width=80)
+    st.image("powerplant1.svg",width=80)
 
 
 #image = Image.open('powerplant.jpg')
@@ -55,41 +57,56 @@ st.write("Welcome to the internal plant intelligence and contact system.")
 
 
 
-tab1, tab2, tab3, tab4 = st.tabs(["Search Plants By Name","Call Directory Overview","All Plants","Sales Activity"])
-tab_names = ["PlantByName","Contacts","CRM"]
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["Search Plants By Name","Call Directory Overview","All Plants","Sales Activity", "Outtages"])
 
-if "active_tab" not in st.session_state:
-    st.session_state["active_tab"] = "PlantByName"
+
 
 
 with tab1:
     st.header("🏭 Powerplants with Contacts & Drives")
 
-    # --- FILTERS UNDER HEADER (same visual design) ---
+    # --- FILTERS UNDER HEADER ---
+    # --- FILTERS UNDER HEADER ---
     with st.container():
         st.subheader("🔍 Search Filters")
 
-        # 1st row of filters
+        # Predefined state list
+        state_list = ["All", "CA", "OR", "WA", "AK", "HI", "AZ", "CO", "ID", "MT", "NM", "NV", "UT", "WY"]
+
+        # Fetch distinct values for dropdowns
+        with get_conn() as conn:
+            try:
+                fuel_types = pd.read_sql("SELECT DISTINCT fuel_type_1 FROM general_plant_info WHERE fuel_type_1 IS NOT NULL ORDER BY fuel_type_1;", conn)
+                fuel_options = ["All"] + fuel_types["fuel_type_1"].dropna().tolist()
+
+                manufacturers = pd.read_sql("SELECT DISTINCT drive_manufacturer FROM plant_drive_info WHERE drive_manufacturer IS NOT NULL ORDER BY drive_manufacturer;", conn)
+                manufacturer_options = ["All"] + manufacturers["drive_manufacturer"].dropna().tolist()
+            except Exception as e:
+                st.error(f"Error loading dropdown data: {e}")
+                fuel_options, manufacturer_options = ["All"], ["All"]
+
+        # 1st row (Plant filters)
         col1, col2, col3 = st.columns(3)
         with col1:
             plantname = st.text_input("Plant Name", key="p1")
         with col2:
-            plantstate = st.text_input("Plant State (e.g., CA, TX, WA)", key="p2")
+            plantstate = st.selectbox("Plant State", state_list, key="p2")
         with col3:
-            plantfuel = st.text_input("Primary Fuel Type", key="p3")
+            plantfuel = st.selectbox("Primary Fuel Type", fuel_options, key="p3")
 
-        # 2nd row of filters (Drive-specific)
+        # 2nd row (Drive filters)
         col4, col5, col6 = st.columns(3)
         with col4:
             drivetype = st.text_input("Drive Type", key="d1")
         with col5:
-            drivemanufacturer = st.text_input("Drive Manufacturer", key="d2")
+            drivemanufacturer = st.selectbox("Drive Manufacturer", manufacturer_options, key="d2")
         with col6:
             drivestartup = st.text_input("Startup Year", key="d3")
 
         search_btn = st.button("Search Plants", use_container_width=True)
 
-    # --- MAIN PLANT LIST (unchanged) ---
+
+    # --- MAIN PLANT LIST ---
     query = """
         SELECT DISTINCT 
             g.plant_id, 
@@ -135,20 +152,20 @@ with tab1:
     if plantname:
         filters.append("g.plantname ILIKE %s")
         params.append(f"%{plantname}%")
-    if plantstate:
-        filters.append("g.company_state ILIKE %s")
-        params.append(f"%{plantstate}%")
-    if plantfuel:
-        filters.append("g.fuel_type_1 ILIKE %s")
-        params.append(f"%{plantfuel}%")
+    if plantstate and plantstate != "All":
+        filters.append("g.company_state = %s")
+        params.append(plantstate)
+    if plantfuel and plantfuel != "All":
+        filters.append("g.fuel_type_1 = %s")
+        params.append(plantfuel)
 
     # ✅ Drive filters
     if drivetype:
         filters.append("d.drive_type ILIKE %s")
         params.append(f"%{drivetype}%")
-    if drivemanufacturer:
-        filters.append("d.drive_manufacturer ILIKE %s")
-        params.append(f"%{drivemanufacturer}%")
+    if drivemanufacturer and drivemanufacturer != "All":
+        filters.append("d.drive_manufacturer = %s")
+        params.append(drivemanufacturer)
     if drivestartup:
         filters.append("d.drive_startup ILIKE %s")
         params.append(f"%{drivestartup}%")
@@ -159,13 +176,13 @@ with tab1:
             #Contact Query (uses same combined filters)
             contact_query = f"""
                 SELECT
+                    g.plantname AS "Plant Name", 
                     c.functional_title AS "Functional Title", 
                     c.actual_title AS "Title", 
                     c.cont_fname AS "First Name", 
                     c.cont_lname AS "Last Name", 
                     c.email AS "Email", 
                     c.phone_number AS "Phone Number",
-                    g.plantname AS "Plant Name", 
                     g.company_address AS "Company Address", 
                     g.company_city  AS "City", 
                     g.company_state AS "State", 
@@ -181,7 +198,8 @@ with tab1:
 
             # Drive Query
             drive_query = f"""
-                SELECT 
+                SELECT                     
+                    g.plantname as "Plant Name",
                     d.drive_name as "Drive Name",
                     d.drive_capacity as "Drive Capacity",
                     d.drive_manufacturer as "Manufacturer",
@@ -189,16 +207,12 @@ with tab1:
                     d.drive_series as "Series",
                     d.drive_info as "Info",
                     d.drive_primary_fuel as "Primary Fuel",
-                    d.drive_generator as "Generator",
-                    d.generator_info as "Generator Info",
-                    d.drive_status as "Status",
                     d.drive_startup as "Startup Year",
-                    g.plantname as "Plant Name",
                     g.company_state as "State"
                 FROM plant_drive_info d 
                 JOIN general_plant_info g ON g.plant_id = d.plant_id
                 {' WHERE ' + ' AND '.join(filters) if filters else ''}
-                ORDER BY g.plantname
+                ORDER BY g.plantname ASC;
             """
             drive_df = pd.read_sql_query(drive_query, conn, params=params)
 
@@ -222,8 +236,6 @@ current_user = st.session_state.get("username","AFCAdmin")
 current_role = st.session_state.get("role","admin")
 
 
-with tab4:
-    display_sales_activity(get_conn)
 
 
 
@@ -235,6 +247,11 @@ with tab2:
 with tab3:
     display_all_plant(get_conn)
 
+with tab4:
+    display_sales_activity(get_conn)
+
+with tab5:
+    display_outtage_comments(get_conn)
 
 
 st.sidebar.caption("To reset search refresh the page! 🔄")
