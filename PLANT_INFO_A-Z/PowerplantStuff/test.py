@@ -4,7 +4,7 @@ from activity import display_sales_activity
 from all_plants import display_all_plant
 from calldir import call_directory
 from login import logout_user, show_login
-from outtage import display_outtage_comments
+from outtage import display_outtages
 import psycopg2
 import streamlit as st
 import pandas as pd
@@ -112,7 +112,6 @@ with tab1:
             g.plant_id, 
             g.plantname, 
             g.ownername, 
-            g.company_address, 
             g.company_city, 
             g.company_state, 
             g.fuel_type_1,
@@ -128,22 +127,51 @@ with tab1:
     with get_conn() as conn:
         df = pd.read_sql_query(query, conn)
 
-    if not df.empty:
-        df = df.drop(columns=["plant_id"], errors="ignore")
+    if df.empty:
+        st.warning("empty table boi")
+    else:
         df = df.rename(columns={
             "plantname": "Plant Name",
             "ownername": "Owner Name",
-            "company_address": "Address",
             "company_city": "City",
             "company_state": "State",
             "fuel_type_1": "Primary Fuel Type",
             "contact_count": "Contacts",
             "drive_count": "Drives"
         })
-        st.dataframe(df, use_container_width=True, hide_index=True)
-    else:
-        st.warning("⚠️ No plants found with both contact and drive info.")
+        if "contacted_status" not in st.session_state:
+            st.session_state.contacted_status = {pid: False for pid in df["plant_id"]}
+        
+        df["Contacted"] = df["plant_id"].apply(lambda pid: st.session_state.contacted_status.get(pid, False))
 
+        edited_df = st.data_editor(
+            df.drop(columns=["plant_id"]),
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Contacted":st.column_config.CheckboxColumn(
+                    "Contacted", help="Mark if you already contacted this plant", default=False
+                )
+            },
+            key="plant_table_editor"
+        )
+
+        for pid,contacted in zip(df["plant_id"],edited_df["Contacted"]):
+            st.session_state.contacted_status[pid] = contacted
+
+        total_contacted = sum(st.session_state.contacted_status.values())
+        st.markdown(f"**{total_contacted} plants are marked as contacted**")
+
+        if st.button("📤 Export Contacted Plants"):
+            contacted_df = df[df["plant_id"].isin(
+                [pid for pid, val in st.session_state.contacted_status.items() if val]
+            )][["Plant Name", "State", "Primary Fuel Type"]]
+            st.download_button(
+                "Download Contacted Plants (CSV)",
+                data=contacted_df.to_csv(index=False).encode("utf-8"),
+                file_name="contacted_plants.csv",
+                mime="text/csv",
+            )
     # --- JOINT FILTER LOGIC ---
     filters = []
     params = []
@@ -251,7 +279,7 @@ with tab4:
     display_sales_activity(get_conn)
 
 with tab5:
-    display_outtage_comments(get_conn)
+    display_outtages(get_conn)
 
 
 st.sidebar.caption("To reset search refresh the page! 🔄")
