@@ -1,5 +1,5 @@
 import sys, os
-
+import io
 from activity import display_sales_activity
 from all_plants import display_all_plant
 from calldir import call_directory
@@ -11,6 +11,9 @@ import pandas as pd
 import warnings
 import time
 from PIL import Image
+from pandas import ExcelWriter
+import xlsxwriter
+
 
 
 
@@ -64,8 +67,21 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs(["Search Plants By Name","Call Directory 
 
 with tab1:
     st.header("🏭 Powerplants with Contacts & Drives")
+    
+    help_btn = st.popover("❓ Help")
+    with help_btn:
+        st.markdown("""
+    ℹ️ **How to Use This Tab**
 
-    # --- FILTERS UNDER HEADER ---
+    - **Filter** plants using the dropdowns below (State,Fuel Type,Drive Type,Manufacturer,Start up year)
+    - **Copy** a plant of your interest and **paste** on **Plant Name** to get detailed information on them.
+    - **Check off** plants once you've contacted them.
+    - Use the **Export** button to save your contacted list as a CSV.
+
+    _Tip:_ Check the contact columns to see which plants have the most amount of contacts.
+
+        """)
+
     # --- FILTERS UNDER HEADER ---
     with st.container():
         st.subheader("🔍 Search Filters")
@@ -172,6 +188,7 @@ with tab1:
                 file_name="contacted_plants.csv",
                 mime="text/csv",
             )
+
     # --- JOINT FILTER LOGIC ---
     filters = []
     params = []
@@ -259,10 +276,50 @@ with tab1:
         else:
             st.info("ℹ️ No matching drive records found.")
 
+        if not contact_df.empty or not drive_df.empty:
+            st.markdown("---")
+            st.subheader("Export Results")
+        
+            col1, col2, col3 = st.columns([1,1,1])
+
+            with col1:
+                if not contact_df.empty:
+                    st.download_button(
+                        label="Download Contacts CSV",
+                        data=contact_df.to_csv(index=False).encode("utf-8"),
+                        file_name="plant_contact_results.csv",
+                        mime="text/csv",
+                        use_container_width=True
+                    )
+            with col2:
+                if not drive_df.empty:
+                    st.download_button(
+                        label="Download Drive CSV",
+                        data=drive_df.to_csv(index=False).encode("utf-8"),
+                        file_name="drive_info.csv",
+                        mime="text/csv",
+                        use_container_width=True
+                    )
+            with col3:
+                buffer = io.BytesIO()
+                with ExcelWriter(buffer, engine="xlsxwriter") as writer:
+                    if not contact_df.empty:
+                        contact_df.to_excel(writer, sheet_name="Contacts", index=False)
+                    if not drive_df.empty:
+                        drive_df.to_excel(writer,sheet_name="Drive",index=False)
+                    writer.close()
+                st.download_button(label="Download Contact & Drive CSV",
+                                   data=buffer.getvalue(),
+                                   file_name="contact_drive_info.xlsx",
+                                   mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                   use_container_width=True
+                )
+
+
+
 
 current_user = st.session_state.get("username","AFCAdmin")
 current_role = st.session_state.get("role","admin")
-
 
 
 

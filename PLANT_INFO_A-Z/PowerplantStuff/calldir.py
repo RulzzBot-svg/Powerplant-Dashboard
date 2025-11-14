@@ -7,6 +7,15 @@ import psycopg2
 def call_directory(get_conn):
 
         st.subheader("📞 Call Directory")
+            
+        help_btn = st.popover("❓ Help")
+        with help_btn:
+            st.markdown("""
+        ℹ️ **How to Use This Tab**
+        - This tab is to get just contact information, no clutter, no drive just contacts.
+        _Tip:_ Use this when you're going in blind looking for more information.
+
+            """)
 
         with st.container():
             st.subheader("Search Filters")

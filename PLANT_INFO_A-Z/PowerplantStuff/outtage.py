@@ -40,6 +40,17 @@ def display_outtages(get_conn):
         # 2️⃣ Filters
         # ------------------------------------------------------
         st.subheader("🔍 Search & Filter")
+        help_btn = st.popover("❓ Help")
+        with help_btn:
+            st.markdown("""
+            ℹ️ **How to Use This Tab**
+            - Enter keywords you're looking for 
+            - **Look** for the plant name (you can type, it autfills!).
+            - **If** the plant has contact info a small rectangle will show up on the right, if not then fill out the form.
+            - **Try** to leave a follow up date, it can be next week or a specific date like 12/15.
+            - **Provide** a summary of what the chat was about, how the conversation felt or if theres more potential with that client.
+            - _Tip:_ Try to be as detailed as possible, its easier for you to come back to your notes later on.
+                """)    
         col1, col2, col3 = st.columns([1.6, 1, 1])
 
         with col1:
@@ -126,9 +137,18 @@ def display_outtages(get_conn):
 
 
     with tab2:
-            
         st.header("Upcoming Outtages")
-        st.caption("A calm, modern overview of upcoming maintenance and outages across all plants.")
+        help_btn = st.popover("❓ Help")
+        with help_btn:
+            st.markdown("""
+            ℹ️ **How to Use This Tab**
+            - Here you can filter upcomng outtages by states, you can choose multiple states and fuel type.
+            - **Red** means it will take place in less than 7 days
+            - **Yellow** means it will take place more than 7 but less than 30 days.
+            - **Green** means it will take place in more than 30 days.
+            - __Tip__ Click "View Details" to get contact information of that plant on the sidebar.
+                """)
+        st.caption("An overview of upcoming maintenance and outages across all plants.")
 
         # ------------------------------------------------------
         # Load Data
@@ -339,8 +359,28 @@ def display_outtages(get_conn):
 
     with tab3:
 
+
         st.markdown("<h1 style='text-align:center;color:#6A5ACD;'>🗺️ Outage Map — Upcoming Events</h1>", unsafe_allow_html=True)
+
+        help_btn = st.popover("❓ Help")
+        with help_btn:
+            st.markdown("""
+            **ℹ️ How to Use This Tab**
+            - Here the plants are mapped on the map, same urgency/color coding is applied as the previous tab.
+            - **Red** means it will take place in less than 7 days
+            - **Yellow** means it will take place more than 7 but less than 30 days.
+            - **Green** means it will take place in more than 30 days.
+            - __Tip__ Hover over a plant to view more details.
+            - __Tip__ Scroll down a bit to choose a plant!
+                """)
+
+
+
+
         st.caption("Visual map of scheduled plant outages, color-coded by urgency.")
+
+
+
 
         # Load data
         try:

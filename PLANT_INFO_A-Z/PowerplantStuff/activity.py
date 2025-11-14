@@ -5,7 +5,20 @@ from datetime import datetime
 
 
 def display_sales_activity(get_conn):
-    st.header("🗂️ Sales / CRM Activity Log")
+    st.header("🗂️ Customer Interaction History")
+
+    help_btn = st.popover("❓ Help")
+    with help_btn:
+        st.markdown("""
+        ℹ️ **How to Use This Tab**
+        - Once you've ended the call you log the interaction!
+        - **Look** for the plant name (you can type, it autfills!).
+        - **If** the plant has contact info a small rectangle will show up on the right, if not then fill out the form.
+        - **Try** to leave a follow up date, it can be next week or a specific date like 12/15.
+        - **Provide** a summary of what the chat was about, how the conversation felt or if theres more potential with that client.
+        - _Tip:_ Try to be as detailed as possible, its easier for you to come back to your notes later on.
+            """)
+    
 
     current_user = st.session_state.get("username", "AFCAdmin")
     current_role = st.session_state.get("role", "admin")
@@ -120,7 +133,7 @@ def display_sales_activity(get_conn):
             username = st.selectbox("Logged By:", user_list)
         else:
             username = current_user
-            st.text_input("Logged By:", value=current_user, disabled=True)
+
 
         submitted = st.form_submit_button("💾 Add Activity")
 
@@ -144,16 +157,18 @@ def display_sales_activity(get_conn):
                         if not existing_contact:
                             first, *last = contact_name.split(" ", 1)
                             last = last[0] if last else ""
+                            contact_id = f"{first} {last}".strip()
+
                             cur.execute("""
                                 INSERT INTO contact_plant_info (
                                     cont_id, plant_id, cont_fname, cont_lname, email, phone_number
                                 )
                                 VALUES (
-                                    gen_random_uuid(),
+                                    %s,
                                     (SELECT plant_id FROM general_plant_info WHERE plantname ILIKE %s LIMIT 1),
                                     %s, %s, %s, %s
                                 );
-                            """, (f"%{plantname}%", first, last, email, phone))
+                            """, (contact_id,f"%{plantname}%", first, last, email, phone))
                             st.info(f"🆕 Added new contact '{contact_name}' to {plantname}")
 
                         # --- Insert the sales activity ---
@@ -207,6 +222,7 @@ def display_sales_activity(get_conn):
                 act_query = """
                     SELECT 
                         a.username AS "User",
+                        a.cont_id AS "Contact",
                         a.plantname AS "Plant",
                         a.activitytype AS "Contacted Via",
                         a.notes AS "Notes",
@@ -220,6 +236,7 @@ def display_sales_activity(get_conn):
                 act_query = """
                     SELECT 
                         a.username AS "User",
+                        a.cont_id AS "Contact",
                         a.plantname AS "Plant",
                         a.activitytype AS "Contacted Via",
                         a.notes AS "Notes",

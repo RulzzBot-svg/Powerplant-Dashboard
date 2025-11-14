@@ -5,6 +5,14 @@ import psycopg2
 
 def display_all_plant(get_conn):
         st.subheader("☢️All Plants (Without Filters)")
+                    
+        help_btn = st.popover("❓ Help")
+        with help_btn:
+            st.markdown("""
+        ℹ️ **How to Use This Tab**
+        - **All Plants** The purpose of the current tab is to have all the plants displayed.
+        - If you don't know where to start you can start by scrolling down the list, finding one you like and start researching more on it!
+            """)
         st.write("The table below displays all the operational powerplants without any filters, some may contain contacts")
         with get_conn() as conn:
             gen_query = """
