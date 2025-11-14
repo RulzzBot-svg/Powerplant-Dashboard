@@ -11,8 +11,8 @@ def display_sales_activity(get_conn):
     with help_btn:
         st.markdown("""
         ℹ️ **How to Use This Tab**
-        - Once you've ended the call you log the interaction!
-        - **Look** for the plant name (you can type, it autfills!).
+        - Once you've ended the call, you log the interaction!
+        - **Look** for the plant name (you can type, it autofills!).
         - **If** the plant has contact info a small rectangle will show up on the right, if not then fill out the form.
         - **Try** to leave a follow up date, it can be next week or a specific date like 12/15.
         - **Provide** a summary of what the chat was about, how the conversation felt or if theres more potential with that client.
