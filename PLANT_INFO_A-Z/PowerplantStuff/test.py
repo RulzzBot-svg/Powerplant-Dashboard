@@ -42,7 +42,7 @@ if st.sidebar.button("🚪 Logout"):
     st.experimental_rerun()
 
 
-st.set_page_config(page_title="PowerPlant Dashboard", layout="wide")
+st.set_page_config(page_title="PowerPlant Dashboard", layout="wide", initial_sidebar_state="expanded")
 col1, col2 = st.columns([1,1.5])
 with col1:
     st.markdown("# AFC Power Plant Portal")
@@ -87,11 +87,23 @@ with tab1:
         st.subheader("🔍 Search Filters")
 
         # Predefined state list
-        state_list = ["All", "CA", "OR", "WA", "AK", "HI", "AZ", "CO", "ID", "MT", "NM", "NV", "UT", "WY"]
+        state_list = [
+            "All",
+            "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL",
+            "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA",
+            "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE",
+            "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK",
+            "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT",
+            "VA", "WA", "WV", "WI", "WY"
+        ]
 
         # Fetch distinct values for dropdowns
         with get_conn() as conn:
             try:
+
+                plant_names = pd.read_sql("SELECT DISTINCT plantname FROM general_plant_info WHERE plantname IS NOT NULL ORDER BY plantname;", conn)
+                plant_option = ["All"]+plant_names["plantname"].dropna().tolist()
+
                 fuel_types = pd.read_sql("SELECT DISTINCT fuel_type_1 FROM general_plant_info WHERE fuel_type_1 IS NOT NULL ORDER BY fuel_type_1;", conn)
                 fuel_options = ["All"] + fuel_types["fuel_type_1"].dropna().tolist()
 
@@ -104,7 +116,7 @@ with tab1:
         # 1st row (Plant filters)
         col1, col2, col3 = st.columns(3)
         with col1:
-            plantname = st.text_input("Plant Name", key="p1")
+            plantname = st.selectbox("Plant Name", plant_option , key="p1")
         with col2:
             plantstate = st.selectbox("Plant State", state_list, key="p2")
         with col3:
@@ -190,37 +202,42 @@ with tab1:
             )
 
     # --- JOINT FILTER LOGIC ---
-    filters = []
-    params = []
+    plant_filters = []
+    plant_params = []
+
+    drive_filters = []
+    drive_params = []
+
+
 
     # ✅ Plant filters
-    if plantname:
-        filters.append("g.plantname ILIKE %s")
-        params.append(f"%{plantname}%")
+    if plantname and plantname !="All":
+        plant_filters.append("g.plantname ILIKE %s")
+        plant_params.append(f"%{plantname}%")
     if plantstate and plantstate != "All":
-        filters.append("g.company_state = %s")
-        params.append(plantstate)
+        plant_filters.append("g.company_state = %s")
+        plant_params.append(plantstate)
     if plantfuel and plantfuel != "All":
-        filters.append("g.fuel_type_1 = %s")
-        params.append(plantfuel)
+        plant_filters.append("g.fuel_type_1 = %s")
+        plant_params.append(plantfuel)
 
     # ✅ Drive filters
-    if drivetype:
-        filters.append("d.drive_type ILIKE %s")
-        params.append(f"%{drivetype}%")
+    if drivetype and drivetype.strip() != "":
+        drive_filters.append("d.drive_type ILIKE %s")
+        drive_params.append(f"%{drivetype}%")
     if drivemanufacturer and drivemanufacturer != "All":
-        filters.append("d.drive_manufacturer = %s")
-        params.append(drivemanufacturer)
-    if drivestartup:
-        filters.append("d.drive_startup ILIKE %s")
-        params.append(f"%{drivestartup}%")
+        drive_filters.append("d.drive_manufacturer = %s")
+        drive_params.append(drivemanufacturer)
+    if drivestartup and drivestartup.strip() != "":
+        drive_filters.append("d.drive_startup ILIKE %s")
+        drive_params.append(f"%{drivestartup}%")
 
     # --- EXECUTE SEARCH ---
     if search_btn:
         with get_conn() as conn:
             #Contact Query (uses same combined filters)
             contact_query = f"""
-                SELECT
+                SELECT DISTINCT
                     g.plantname AS "Plant Name", 
                     c.functional_title AS "Functional Title", 
                     c.actual_title AS "Title", 
@@ -235,31 +252,31 @@ with tab1:
                     g.company_url AS "Company URL"
                 FROM general_plant_info g
                 LEFT JOIN contact_plant_info c ON g.plant_id = c.plant_id
-                LEFT JOIN plant_drive_info d ON g.plant_id = d.plant_id
-                {' WHERE ' + ' AND '.join(filters) if filters else ''}
-                ORDER BY g.plantname
+                {' WHERE ' + ' AND '.join(plant_filters) if plant_filters else ''}
+                ORDER BY g.plantname;
             """
-            contact_df = pd.read_sql_query(contact_query, conn, params=params)
+            contact_df = pd.read_sql_query(contact_query, conn, params=plant_params)
 
             # Drive Query
-            drive_query = f"""
-                SELECT                     
-                    g.plantname as "Plant Name",
-                    d.drive_name as "Drive Name",
-                    d.drive_capacity as "Drive Capacity",
-                    d.drive_manufacturer as "Manufacturer",
-                    d.drive_type as "Type",
-                    d.drive_series as "Series",
-                    d.drive_info as "Info",
-                    d.drive_primary_fuel as "Primary Fuel",
-                    d.drive_startup as "Startup Year",
-                    g.company_state as "State"
-                FROM plant_drive_info d 
+            drive_query = f"""                 
+                SELECT
+                    g.plantname AS "Plant Name",
+                    d.drive_name AS "Drive Name",
+                    d.drive_capacity AS "Drive Capacity",
+                    d.drive_manufacturer AS "Manufacturer",
+                    d.drive_type AS "Type",
+                    d.drive_series AS "Series",
+                    d.drive_info AS "Info",
+                    d.drive_primary_fuel AS "Primary Fuel",
+                    d.drive_startup AS "Startup Year",
+                    g.company_state AS "State"
+                FROM plant_drive_info d
                 JOIN general_plant_info g ON g.plant_id = d.plant_id
-                {' WHERE ' + ' AND '.join(filters) if filters else ''}
-                ORDER BY g.plantname ASC;
+                { 'WHERE ' + ' AND '.join(plant_filters + drive_filters) 
+                    if (plant_filters or drive_filters) else '' }
+                ORDER BY g.plantname
             """
-            drive_df = pd.read_sql_query(drive_query, conn, params=params)
+            drive_df = pd.read_sql_query(drive_query, conn, params=plant_params + drive_params)
 
         # --- DISPLAY RESULTS ---
         if not contact_df.empty:
@@ -287,7 +304,7 @@ with tab1:
                     st.download_button(
                         label="Download Contacts CSV",
                         data=contact_df.to_csv(index=False).encode("utf-8"),
-                        file_name="plant_contact_results.csv",
+                        file_name=f"{plantname}_plant_contact_results_{plantstate}.csv",
                         mime="text/csv",
                         use_container_width=True
                     )
@@ -296,23 +313,26 @@ with tab1:
                     st.download_button(
                         label="Download Drive CSV",
                         data=drive_df.to_csv(index=False).encode("utf-8"),
-                        file_name="drive_info.csv",
+                        file_name=f"{plantname}_drive_info_{plantfuel}.csv",
                         mime="text/csv",
                         use_container_width=True
                     )
             with col3:
                 buffer = io.BytesIO()
-                with ExcelWriter(buffer, engine="xlsxwriter") as writer:
+                with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
                     if not contact_df.empty:
                         contact_df.to_excel(writer, sheet_name="Contacts", index=False)
                     if not drive_df.empty:
-                        drive_df.to_excel(writer,sheet_name="Drive",index=False)
-                    writer.close()
-                st.download_button(label="Download Contact & Drive CSV",
-                                   data=buffer.getvalue(),
-                                   file_name="contact_drive_info.xlsx",
-                                   mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                                   use_container_width=True
+                        drive_df.to_excel(writer, sheet_name="Drive", index=False)
+                
+                buffer.seek(0)
+
+                st.download_button(
+                    label="Download Contact & Driver Information",
+                    data=buffer,
+                    file_name=f"{plantname}_info.xlsx",
+                    mime="application/vnd.openxmlformats-officedocuments.spreadsheetml.sheet",
+                    use_container_width=True
                 )
 
 
@@ -340,7 +360,7 @@ with tab5:
 
 
 st.sidebar.caption("To reset search refresh the page! 🔄")
-st.sidebar.caption("States availabe:CA, OR, WA, AK, HI, AZ, CO, ID, MT, NM,NV,UT,WY ")
+st.sidebar.caption("Choose a dark theme or custom theme! So it looks pretty")
 
 
 st.sidebar.caption("Made by: Raul Ostorga & Oscar Ostorga")

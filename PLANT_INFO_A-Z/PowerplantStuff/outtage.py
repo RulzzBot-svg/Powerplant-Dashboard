@@ -176,12 +176,16 @@ def display_outtages(get_conn):
         # ------------------------------------------------------
         # Filters
         # ------------------------------------------------------
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
         with col1:
             state_filter = st.multiselect(
                 "Filter by State",
-                ["All States", "California", "Oregon", "Washington", "Alaska", "Hawaii",
-                "Arizona", "Colorado", "Idaho", "Montana", "New Mexico", "Nevada", "Utah", "Wyoming"],
+                ["All States", "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida",
+                "Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine",
+                "Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska",
+                "Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota",
+                "Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota",
+                "Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"],
                 default=["All States"]
             )
         with col2:
@@ -189,14 +193,23 @@ def display_outtages(get_conn):
                 "Filter by Fuel Type",
                 ["All"] + sorted(df["primary_fuel"].dropna().unique().tolist())
             )
+        with col3:
+            plant_name_filter = st.selectbox(
+                "Filter by Plant Name",
+                ["All Plants"] + sorted(df["plant_name"].dropna().unique().tolist())
+            )
 
         df["plant_state"] = df["plant_state"].astype(str).str.strip().str.title()
         df["primary_fuel"] = df["primary_fuel"].astype(str).str.strip()
 
         if "All States" not in state_filter:
             df = df[df["plant_state"].isin(state_filter)]
+
         if fuel_filter != "All":
             df = df[df["primary_fuel"].str.lower() == fuel_filter.lower()]
+        
+        if plant_name_filter != "All Plants":
+            df = df[df["plant_name"]==plant_name_filter]
 
         if df.empty:
             st.warning("⚠️ No outages match your selected filters.")

@@ -11,7 +11,7 @@ def display_sales_activity(get_conn):
     with help_btn:
         st.markdown("""
         ℹ️ **How to Use This Tab**
-        - Once you've ended the call, you log the interaction!
+        - Once you've ended the call, you log the interaction!  
         - **Look** for the plant name (you can type, it autofills!).
         - **If** the plant has contact info a small rectangle will show up on the right, if not then fill out the form.
         - **Try** to leave a follow up date, it can be next week or a specific date like 12/15.
@@ -222,13 +222,14 @@ def display_sales_activity(get_conn):
                 act_query = """
                     SELECT 
                         a.username AS "User",
-                        a.cont_id AS "Contact",
+                        COALESCE(c.cont_fname || ' ' || c.cont_lname, a.cont_id::text) AS "Contact",
                         a.plantname AS "Plant",
                         a.activitytype AS "Contacted Via",
                         a.notes AS "Notes",
                         a.follow_up_date AS "Follow-up Date",
                         TO_CHAR(a.created_at, 'YYYY-MM-DD HH24:MI') AS "Created At"
                     FROM sales_activity a
+                    LEFT JOIN contact_plant_info c ON a.cont_id = c.cont_id
                     ORDER BY a.created_at DESC;
                 """
                 df = pd.read_sql(act_query, conn)
