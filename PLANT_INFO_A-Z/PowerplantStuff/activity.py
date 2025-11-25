@@ -16,74 +16,92 @@ def display_sales_activity(get_conn):
         - **If** the plant has contact info a small rectangle will show up on the right, if not then fill out the form.
         - **Try** to leave a follow up date, it can be next week or a specific date like 12/15.
         - **Provide** a summary of what the chat was about, how the conversation felt or if theres more potential with that client.
-        - _Tip:_ Try to be as detailed as possible, its easier for you to come back to your notes later on.
-            """)
-    
+        - _Tip:_ Try to be as detailed as possible.
+        """)
 
     current_user = st.session_state.get("username", "AFCAdmin")
     current_role = st.session_state.get("role", "admin")
 
-    # --- Load dropdowns ---
-    with get_conn() as conn:
-        users_df = pd.read_sql("SELECT DISTINCT username, role FROM app_users ORDER BY username;", conn)
-        user_list = users_df["username"].tolist()
+    # ================================================================
+    #  CACHED LOADERS  (big performance gain)
+    # ================================================================
 
-        plants_df = pd.read_sql("SELECT plant_id, plantname FROM general_plant_info ORDER BY plantname;", conn)
-        plant_names = plants_df["plantname"].tolist()
+    @st.cache_data(ttl=300)
+    def load_users_and_plants():
+        with get_conn() as conn:
+            users = pd.read_sql("SELECT DISTINCT username, role FROM app_users ORDER BY username;", conn)
+            plants = pd.read_sql("SELECT plant_id, plantname FROM general_plant_info ORDER BY plantname;", conn)
+        return users, plants
+
+    users_df, plants_df = load_users_and_plants()
+    user_list = users_df["username"].tolist()
+    plant_names = plants_df["plantname"].tolist()
+
+    @st.cache_data
+    def load_contacts_for_plant(plantname):
+        """Load contacts for a plant (cached)."""
+        with get_conn() as conn:
+            query = """
+                SELECT DISTINCT 
+                    cont_fname || ' ' || cont_lname AS full_name, 
+                    cont_fname, 
+                    cont_lname
+                FROM contact_plant_info
+                WHERE plant_id = (
+                    SELECT plant_id FROM general_plant_info
+                    WHERE TRIM(plantname) ILIKE %s LIMIT 1
+                )
+                ORDER BY cont_lname, cont_fname;
+            """
+            df = pd.read_sql(query, conn, params=(f"%{plantname}%",))
+        return df
+
+    @st.cache_data
+    def load_contact_details(contact_name):
+        """Fetch email + phone for an existing contact."""
+        with get_conn() as conn:
+            details_query = """
+                SELECT email, phone_number 
+                FROM contact_plant_info
+                WHERE cont_fname || ' ' || cont_lname ILIKE %s
+                LIMIT 1;
+            """
+            df = pd.read_sql(details_query, conn, params=(f"%{contact_name}%",))
+        return df
 
     # ================================================================
-    # STEP 1: Select Plant and Contact
+    # STEP 1: Select Plant & Contact
     # ================================================================
     st.subheader("Select Plant & Contact")
 
     plantname = st.selectbox("Plant Name:", [""] + plant_names)
 
-    contact_list = []
-
     if plantname:
-        try:
-            with get_conn() as conn:
-                contact_query = """
-                    SELECT DISTINCT 
-                        cont_fname || ' ' || cont_lname AS full_name, cont_fname, cont_lname
-                    FROM contact_plant_info
-                    WHERE plant_id = (
-                        SELECT plant_id FROM general_plant_info
-                        WHERE TRIM(plantname) ILIKE %s LIMIT 1
-                    )
-                    ORDER BY cont_lname, cont_fname;
-                """
-                contact_df = pd.read_sql(contact_query, conn, params=(f"%{plantname}%",))
-                contact_list = contact_df["full_name"].tolist()
-        except Exception as e:
-            st.error(f"⚠️ Error fetching contacts: {e}")
+        contact_df = load_contacts_for_plant(plantname)
+        contact_list = contact_df["full_name"].tolist()
+    else:
+        contact_list = []
 
-            
     # ================================================================
-    # 👤 Contact selection — hybrid input (new or existing)
+    # Contact selection — hybrid input
     # ================================================================
     col_contact1, col_contact2 = st.columns([2, 1])
 
     with col_contact1:
-        # Free-text name entry (kept persistent across reruns)
-        contact_name = st.text_input("Contact Name (type or pick below):", value=st.session_state.get("contact_name", ""))
-        st.session_state.contact_name = contact_name  # keep typed value
+        contact_name = st.text_input("Contact Name (type or pick below):", 
+                                     value=st.session_state.get("contact_name", ""))
+        st.session_state.contact_name = contact_name
 
     with col_contact2:
-        # Dropdown list of known contacts
         selected_existing = ""
         if contact_list:
             selected_existing = st.selectbox("Existing Contacts:", [""] + contact_list)
 
-    # ✅ If a contact was chosen from dropdown, override typed name
     if selected_existing:
         contact_name = selected_existing
         st.session_state.contact_name = contact_name
 
-
-                
     new_contact = False
-
     contact_email = ""
     contact_phone = ""
 
@@ -91,22 +109,12 @@ def display_sales_activity(get_conn):
     # STEP 2: Auto-populate contact details
     # ================================================================
     if contact_name and contact_name in contact_list:
-        try:
-            with get_conn() as conn:
-                details_query = """
-                    SELECT email, phone_number 
-                    FROM contact_plant_info
-                    WHERE cont_fname || ' ' || cont_lname ILIKE %s
-                    LIMIT 1;
-                """
-                details_df = pd.read_sql(details_query, conn, params=(f"%{contact_name}%",))
-                if not details_df.empty:
-                    contact_email = details_df.loc[0, "email"] or ""
-                    contact_phone = details_df.loc[0, "phone_number"] or ""
-        except Exception as e:
-            st.warning(f"Could not fetch contact details: {e}")
+        details_df = load_contact_details(contact_name)
+        if not details_df.empty:
+            contact_email = details_df.loc[0, "email"] or ""
+            contact_phone = details_df.loc[0, "phone_number"] or ""
     elif contact_name:
-        new_contact = True  # user typed a new name
+        new_contact = True
 
     # ================================================================
     # STEP 3: Add Activity Form
@@ -120,7 +128,6 @@ def display_sales_activity(get_conn):
         with col2:
             follow_up = st.text_input("Follow-up Date or Note (e.g. 'Next Monday')")
 
-        # 👇 These auto-populate or allow new entry
         col3, col4 = st.columns(2)
         with col3:
             email = st.text_input("Email:", value=contact_email)
@@ -134,11 +141,10 @@ def display_sales_activity(get_conn):
         else:
             username = current_user
 
-
         submitted = st.form_submit_button("💾 Add Activity")
 
     # ================================================================
-    # STEP 4: Insert Logic (Add new contact if needed)
+    # STEP 4: Insert Logic
     # ================================================================
     if submitted:
         if not plantname or not contact_name or not notes:
@@ -147,7 +153,8 @@ def display_sales_activity(get_conn):
             try:
                 with get_conn() as conn:
                     with conn.cursor() as cur:
-                        # --- Add new contact if it doesn't exist ---
+
+                        # Insert new contact if needed
                         cur.execute("""
                             SELECT cont_id FROM contact_plant_info 
                             WHERE cont_fname || ' ' || cont_lname ILIKE %s LIMIT 1;
@@ -168,11 +175,11 @@ def display_sales_activity(get_conn):
                                     (SELECT plant_id FROM general_plant_info WHERE plantname ILIKE %s LIMIT 1),
                                     %s, %s, %s, %s
                                 );
-                            """, (contact_id,f"%{plantname}%", first, last, email, phone))
+                            """, (contact_id, f"%{plantname}%", first, last, email, phone))
                             st.info(f"🆕 Added new contact '{contact_name}' to {plantname}")
 
-                        # --- Insert the sales activity ---
-                        insert_activity = """
+                        # Insert activity
+                        cur.execute("""
                             INSERT INTO sales_activity (
                                 cont_id,
                                 plant_id,
@@ -183,24 +190,15 @@ def display_sales_activity(get_conn):
                                 follow_up_date
                             )
                             VALUES (
-                                (SELECT cont_id FROM contact_plant_info WHERE cont_fname || ' ' || cont_lname ILIKE %s LIMIT 1),
-                                (SELECT plant_id FROM general_plant_info WHERE plantname ILIKE %s LIMIT 1),
-                                %s,
-                                %s,
-                                %s,
-                                %s,
-                                %s
+                                (SELECT cont_id FROM contact_plant_info 
+                                 WHERE cont_fname || ' ' || cont_lname ILIKE %s LIMIT 1),
+                                (SELECT plant_id FROM general_plant_info 
+                                 WHERE plantname ILIKE %s LIMIT 1),
+                                %s, %s, %s, %s, %s
                             );
-                        """
-                        cur.execute(insert_activity, (
-                            f"%{contact_name}%",
-                            f"%{plantname}%",
-                            plantname,
-                            username,
-                            activity_type,
-                            notes,
-                            follow_up
-                        ))
+                        """, (f"%{contact_name}%", f"%{plantname}%", plantname,
+                              username, activity_type, notes, follow_up))
+
                         conn.commit()
 
                 st.success(f"✅ Activity for {contact_name} at {plantname} logged successfully!")
@@ -211,15 +209,16 @@ def display_sales_activity(get_conn):
                 st.error(f"Unexpected error: {str(e)}")
 
     # ================================================================
-    # 📋 STEP 5: Display Activity Log
+    # STEP 5: Display Activity Log
     # ================================================================
     st.markdown("---")
     st.subheader("Recent Activity")
 
-    try:
+    @st.cache_data(ttl=120)
+    def load_activity_log(role, user):
         with get_conn() as conn:
-            if current_role == "admin":
-                act_query = """
+            if role == "admin":
+                query = """
                     SELECT 
                         a.username AS "User",
                         COALESCE(c.cont_fname || ' ' || c.cont_lname, a.cont_id::text) AS "Contact",
@@ -232,9 +231,9 @@ def display_sales_activity(get_conn):
                     LEFT JOIN contact_plant_info c ON a.cont_id = c.cont_id
                     ORDER BY a.created_at DESC;
                 """
-                df = pd.read_sql(act_query, conn)
+                return pd.read_sql(query, conn)
             else:
-                act_query = """
+                query = """
                     SELECT 
                         a.username AS "User",
                         a.cont_id AS "Contact",
@@ -247,8 +246,10 @@ def display_sales_activity(get_conn):
                     WHERE a.username = %s
                     ORDER BY a.created_at DESC;
                 """
-                df = pd.read_sql(act_query, conn, params=(current_user,))
+                return pd.read_sql(query, conn, params=(user,))
 
+    try:
+        df = load_activity_log(current_role, current_user)
         if not df.empty:
             st.dataframe(df, use_container_width=True, hide_index=True)
         else:

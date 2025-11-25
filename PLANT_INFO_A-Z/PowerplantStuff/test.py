@@ -9,30 +9,96 @@ import psycopg2
 import streamlit as st
 import pandas as pd
 import warnings
-import time
 from PIL import Image
 from pandas import ExcelWriter
 import xlsxwriter
 
+# ------------------------------------------------------
+# Streamlit config (should be one of the first calls)
+# ------------------------------------------------------
+st.set_page_config(
+    page_title="PowerPlant Dashboard",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-
-
-
-#ignore a warning in terminal just tells me to use sqlalchemy
+# ignore a warning in terminal just tells me to use sqlalchemy
 warnings.filterwarnings("ignore", category=UserWarning, module="psycopg2")
 
-#connecting
-
+# ------------------------------------------------------
+# DB connection
+# ------------------------------------------------------
 def get_conn():
     return psycopg2.connect(
-    host="192.168.1.131",
-    database="PowerPlantDashboard",
-    user="postgres",
-    password="pass123",
-    port=5432
+        host="192.168.1.131",
+        database="PowerPlantDashboard",
+        user="postgres",
+        password="pass123",
+        port=5432
     )
 
+# ------------------------------------------------------
+# CACHED LOADERS for Plant Search tab
+# ------------------------------------------------------
+@st.cache_data(ttl=900)
+def load_filter_data():
+    """
+    Load plant names, fuel types, and manufacturers for dropdowns.
+    Tables: general_plant_info, plant_drive_info (mostly static).
+    """
+    with get_conn() as conn:
+        plant_names = pd.read_sql(
+            "SELECT DISTINCT plantname FROM general_plant_info "
+            "WHERE plantname IS NOT NULL ORDER BY plantname;",
+            conn
+        )
+        fuel_types = pd.read_sql(
+            "SELECT DISTINCT fuel_type_1 FROM general_plant_info "
+            "WHERE fuel_type_1 IS NOT NULL ORDER BY fuel_type_1;",
+            conn
+        )
+        manufacturers = pd.read_sql(
+            "SELECT DISTINCT drive_manufacturer FROM plant_drive_info "
+            "WHERE drive_manufacturer IS NOT NULL ORDER BY drive_manufacturer;",
+            conn
+        )
 
+    plant_option = ["All"] + plant_names["plantname"].dropna().tolist()
+    fuel_options = ["All"] + fuel_types["fuel_type_1"].dropna().tolist()
+    manufacturer_options = ["All"] + manufacturers["drive_manufacturer"].dropna().tolist()
+
+    return plant_option, fuel_options, manufacturer_options
+
+
+@st.cache_data(ttl=120)
+def load_main_plant_summary():
+    """
+    Load the main plant list with contact & drive counts.
+    Uses contact_plant_info (changes more often), so TTL is short.
+    """
+    query = """
+        SELECT DISTINCT 
+            g.plant_id, 
+            g.plantname, 
+            g.ownername, 
+            g.company_city, 
+            g.company_state, 
+            g.fuel_type_1,
+            COUNT(DISTINCT c.cont_id) AS contact_count,
+            COUNT(DISTINCT d.drive_id) AS drive_count
+        FROM general_plant_info g
+        INNER JOIN contact_plant_info c ON g.plant_id = c.plant_id
+        INNER JOIN plant_drive_info d ON g.plant_id = d.plant_id
+        GROUP BY g.plant_id, g.plantname, g.ownername, g.company_address, g.company_city, g.company_state, g.fuel_type_1
+        ORDER BY g.plantname ASC;
+    """
+    with get_conn() as conn:
+        df = pd.read_sql_query(query, conn)
+    return df
+
+# ------------------------------------------------------
+# LOGIN
+# ------------------------------------------------------
 user = show_login(get_conn)
 
 # --- Sidebar ---
@@ -41,31 +107,94 @@ if st.sidebar.button("🚪 Logout"):
     logout_user()
     st.experimental_rerun()
 
-
-st.set_page_config(page_title="PowerPlant Dashboard", layout="wide", initial_sidebar_state="expanded")
-col1, col2 = st.columns([1,1.5])
+# ------------------------------------------------------
+# HEADER
+# ------------------------------------------------------
+col1, col2 = st.columns([1, 1.5])
 with col1:
     st.markdown("# AFC Power Plant Portal")
 with col2:
-    st.image("powerplant1.svg",width=80)
+    st.image("powerplant1.svg", width=80)
 
-
-#image = Image.open('powerplant.jpg')
-#st.title("AFC Powerplant Portal")
-#st.image(image, width=50)
 st.write("Welcome to the internal plant intelligence and contact system.")
 
+# ------------------------------------------------------
+# FAKE TABS (RADIO) WITH SOFT-PASTEL STYLE
+# ------------------------------------------------------
+st.markdown(
+    """
+    <style>
+    /* Container for the radio (our fake tabs) */
+    div[data-testid="stHorizontalBlock"] > div[role="radiogroup"] {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
 
+    /* Each radio option label */
+    div[role="radiogroup"] > label {
+        border-radius: 999px; /* pill shape */
+        padding: 0.4rem 0.9rem;
+        border: 1px solid #444;
+        background: #1b1e27;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+        color: #e0e0e0;
+    }
 
+    /* Make the little native radio circle invisible */
+    div[role="radiogroup"] > label > div:first-child {
+        display: none;
+    }
 
+    /* Selected tab */
+    div[role="radiogroup"] > label[data-selected="true"] {
+        background: linear-gradient(135deg, #6A5ACD, #4A90E2);
+        border-color: #6A5ACD;
+        color: #ffffff;
+        box-shadow: 0 0 8px rgba(106, 90, 205, 0.6);
+    }
 
+    /* Hover effect */
+    div[role="radiogroup"] > label:hover {
+        border-color: #6A5ACD;
+        box-shadow: 0 0 6px rgba(106, 90, 205, 0.4);
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["Search Plants By Name","Call Directory Overview","All Plants","Sales Activity", "Outtages"])
+tab = st.radio(
+    "Navigation",
+    [
+        "Search Plants By Name",
+        "Call Directory Overview",
+        "All Plants",
+        "Sales Activity",
+        "Outtages",
+    ],
+    horizontal=True,
+    key="main_nav",
+)
 
+# Hide the "Navigation" label visually to look more like tabs
+st.markdown(
+    """
+    <style>
+    label[for="main_nav"] {
+        display: none;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-
-
-with tab1:
+# ------------------------------------------------------
+# TAB 1 FUNCTION: Search Plants By Name
+# ------------------------------------------------------
+def tab_search_plants():
     st.header("🏭 Powerplants with Contacts & Drives")
     
     help_btn = st.popover("❓ Help")
@@ -79,7 +208,6 @@ with tab1:
     - Use the **Export** button to save your contacted list as a CSV.
 
     _Tip:_ Check the contact columns to see which plants have the most amount of contacts.
-
         """)
 
     # --- FILTERS UNDER HEADER ---
@@ -97,26 +225,17 @@ with tab1:
             "VA", "WA", "WV", "WI", "WY"
         ]
 
-        # Fetch distinct values for dropdowns
-        with get_conn() as conn:
-            try:
-
-                plant_names = pd.read_sql("SELECT DISTINCT plantname FROM general_plant_info WHERE plantname IS NOT NULL ORDER BY plantname;", conn)
-                plant_option = ["All"]+plant_names["plantname"].dropna().tolist()
-
-                fuel_types = pd.read_sql("SELECT DISTINCT fuel_type_1 FROM general_plant_info WHERE fuel_type_1 IS NOT NULL ORDER BY fuel_type_1;", conn)
-                fuel_options = ["All"] + fuel_types["fuel_type_1"].dropna().tolist()
-
-                manufacturers = pd.read_sql("SELECT DISTINCT drive_manufacturer FROM plant_drive_info WHERE drive_manufacturer IS NOT NULL ORDER BY drive_manufacturer;", conn)
-                manufacturer_options = ["All"] + manufacturers["drive_manufacturer"].dropna().tolist()
-            except Exception as e:
-                st.error(f"Error loading dropdown data: {e}")
-                fuel_options, manufacturer_options = ["All"], ["All"]
+        # Fetch distinct values for dropdowns (CACHED)
+        try:
+            plant_option, fuel_options, manufacturer_options = load_filter_data()
+        except Exception as e:
+            st.error(f"Error loading dropdown data: {e}")
+            plant_option, fuel_options, manufacturer_options = ["All"], ["All"], ["All"]
 
         # 1st row (Plant filters)
         col1, col2, col3 = st.columns(3)
         with col1:
-            plantname = st.selectbox("Plant Name", plant_option , key="p1")
+            plantname = st.selectbox("Plant Name", plant_option, key="p1")
         with col2:
             plantstate = st.selectbox("Plant State", state_list, key="p2")
         with col3:
@@ -133,27 +252,8 @@ with tab1:
 
         search_btn = st.button("Search Plants", use_container_width=True)
 
-
-    # --- MAIN PLANT LIST ---
-    query = """
-        SELECT DISTINCT 
-            g.plant_id, 
-            g.plantname, 
-            g.ownername, 
-            g.company_city, 
-            g.company_state, 
-            g.fuel_type_1,
-            COUNT(DISTINCT c.cont_id) AS contact_count,
-            COUNT(DISTINCT d.drive_id) AS drive_count
-        FROM general_plant_info g
-        INNER JOIN contact_plant_info c ON g.plant_id = c.plant_id
-        INNER JOIN plant_drive_info d ON g.plant_id = d.plant_id
-        GROUP BY g.plant_id, g.plantname, g.ownername, g.company_address, g.company_city, g.company_state, g.fuel_type_1
-        ORDER BY g.plantname ASC;
-    """
-
-    with get_conn() as conn:
-        df = pd.read_sql_query(query, conn)
+    # --- MAIN PLANT LIST (CACHED) ---
+    df = load_main_plant_summary()
 
     if df.empty:
         st.warning("empty table boi")
@@ -177,14 +277,14 @@ with tab1:
             use_container_width=True,
             hide_index=True,
             column_config={
-                "Contacted":st.column_config.CheckboxColumn(
+                "Contacted": st.column_config.CheckboxColumn(
                     "Contacted", help="Mark if you already contacted this plant", default=False
                 )
             },
             key="plant_table_editor"
         )
 
-        for pid,contacted in zip(df["plant_id"],edited_df["Contacted"]):
+        for pid, contacted in zip(df["plant_id"], edited_df["Contacted"]):
             st.session_state.contacted_status[pid] = contacted
 
         total_contacted = sum(st.session_state.contacted_status.values())
@@ -208,10 +308,8 @@ with tab1:
     drive_filters = []
     drive_params = []
 
-
-
     # ✅ Plant filters
-    if plantname and plantname !="All":
+    if plantname and plantname != "All":
         plant_filters.append("g.plantname ILIKE %s")
         plant_params.append(f"%{plantname}%")
     if plantstate and plantstate != "All":
@@ -235,7 +333,7 @@ with tab1:
     # --- EXECUTE SEARCH ---
     if search_btn:
         with get_conn() as conn:
-            #Contact Query (uses same combined filters)
+            # Contact Query (plant filters only)
             contact_query = f"""
                 SELECT DISTINCT
                     g.plantname AS "Plant Name", 
@@ -257,7 +355,7 @@ with tab1:
             """
             contact_df = pd.read_sql_query(contact_query, conn, params=plant_params)
 
-            # Drive Query
+            # Drive Query (plant + drive filters)
             drive_query = f"""                 
                 SELECT
                     g.plantname AS "Plant Name",
@@ -297,7 +395,7 @@ with tab1:
             st.markdown("---")
             st.subheader("Export Results")
         
-            col1, col2, col3 = st.columns([1,1,1])
+            col1, col2, col3 = st.columns([1, 1, 1])
 
             with col1:
                 if not contact_df.empty:
@@ -335,35 +433,38 @@ with tab1:
                     use_container_width=True
                 )
 
+# ------------------------------------------------------
+# USER CONTEXT (still available if needed)
+# ------------------------------------------------------
+current_user = st.session_state.get("username", "AFCAdmin")
+current_role = st.session_state.get("role", "admin")
 
+# ------------------------------------------------------
+# ROUTE TO SELECTED TAB
+# ------------------------------------------------------
+if tab == "Search Plants By Name":
+    tab_search_plants()
 
-
-current_user = st.session_state.get("username","AFCAdmin")
-current_role = st.session_state.get("role","admin")
-
-
-
-
-#CALL DIRECTORY
-
-with tab2:
+elif tab == "Call Directory Overview":
+    # this function draws its own layout
     call_directory(get_conn)
 
-with tab3:
+elif tab == "All Plants":
     display_all_plant(get_conn)
 
-with tab4:
+elif tab == "Sales Activity":
     display_sales_activity(get_conn)
 
-with tab5:
+elif tab == "Outtages":
     display_outtages(get_conn)
 
-
+# ------------------------------------------------------
+# FOOTER
+# ------------------------------------------------------
 st.sidebar.caption("To reset search refresh the page! 🔄")
 st.sidebar.caption("Choose a dark theme or custom theme! So it looks pretty")
-
-
 st.sidebar.caption("Made by: Raul Ostorga & Oscar Ostorga")
+
 #
 #⠀⠀⠀⠀⠀⠀⠀⠀⣠⡤⠒⠛⣋⣉⡛⠲⢿⣄⣀⣠⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀
 #⠀⠀⠀⠀⠀⠀⣠⠞⠁⠀⣴⣿⣿⣿⣿⣧⣀⣿⣿⣿⣿⣿⣷⠦⢤⣀⠀⠀⠀⠀
@@ -384,14 +485,4 @@ st.sidebar.caption("Made by: Raul Ostorga & Oscar Ostorga")
 #⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢈⣛⣶⡶⠚⠛⠓⠒⠒⠛⠲⣄⠀⠀⠀
 #⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡰⠼⣯⣅⣖⣀⣒⣘⣙⣦⣈⣷⣀⣸⠇⠀⠀
 #
-#
 # Need something?
-
-
-
-
-
-
-
-
-
