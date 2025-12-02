@@ -1,0 +1,9 @@
+@echo off
+REM Go to project folder
+cd /d "C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff"
+
+REM Activate virtual environment
+call "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Scripts\activate.bat"
+
+REM Run Streamlit app
+streamlit run test.py

@@ -202,6 +202,7 @@ def display_sales_activity(get_conn):
                         conn.commit()
 
                 st.success(f"✅ Activity for {contact_name} at {plantname} logged successfully!")
+                st.cache_data.clear()
 
             except psycopg2.Error as e:
                 st.error(f"Database error: {e.pgerror}")
@@ -233,16 +234,17 @@ def display_sales_activity(get_conn):
                 """
                 return pd.read_sql(query, conn)
             else:
-                query = """
+                query = """ 
                     SELECT 
                         a.username AS "User",
-                        a.cont_id AS "Contact",
+                        COALESCE(c.cont_fname || ' ' || c.cont_lname, a.cont_id::text) AS "Contact",
                         a.plantname AS "Plant",
                         a.activitytype AS "Contacted Via",
                         a.notes AS "Notes",
                         a.follow_up_date AS "Follow-up Date",
                         TO_CHAR(a.created_at, 'YYYY-MM-DD HH24:MI') AS "Created At"
                     FROM sales_activity a
+                    LEFT JOIN contact_plant_info c ON a.cont_id = c.cont_id
                     WHERE a.username = %s
                     ORDER BY a.created_at DESC;
                 """

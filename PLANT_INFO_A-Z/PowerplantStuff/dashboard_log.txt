@@ -1,0 +1,394 @@
+
+      Welcome to Streamlit!
+
+      If you'd like to receive helpful onboarding emails, news, offers, promotions,
+      and the occasional swag, please enter your email address below. Otherwise,
+      leave this field blank.
+
+      Email:  
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://192.168.1.131:8501
+
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:51: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  plant_names = pd.read_sql(
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:56: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  fuel_types = pd.read_sql(
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:61: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  manufacturers = pd.read_sql(
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:97: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  df = pd.read_sql_query(query, conn)
+2025-12-02 08:09:39.135 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2025-12-02 08:09:50.170 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2025-12-02 08:09:51.837 Uncaught app execution
+Traceback (most recent call last):
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\runtime\scriptrunner\exec_code.py", line 128, in exec_func_with_error_handling
+    result = func()
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\runtime\scriptrunner\script_runner.py", line 669, in code_to_exec
+    exec(code, module.__dict__)  # noqa: S102
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py", line 118, in <module>
+    logout_user()
+    ~~~~~~~~~~~^^
+  File "C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\login.py", line 72, in logout_user
+    cookie.delete(key)
+    ~~~~~~~~~~~~~^^^^^
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\extra_streamlit_components\CookieManager\__init__.py", line 109, in delete
+    self.cookie_manager(method="delete", cookie=cookie, key=key, default=False)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\components\v1\custom_component.py", line 59, in __call__
+    return self.create_instance(
+           ~~~~~~~~~~~~~~~~~~~~^
+        *args,
+        ^^^^^^
+    ...<4 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\runtime\metrics_util.py", line 443, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\components\v1\custom_component.py", line 216, in create_instance
+    return_value = marshall_component(dg, element)
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\components\v1\custom_component.py", line 176, in marshall_component
+    computed_id = compute_and_register_element_id(
+        "component_instance",
+    ...<9 lines>...
+        special_args=special_args,
+    )
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\elements\lib\utils.py", line 265, in compute_and_register_element_id
+    _register_element_id(ctx, element_type, element_id)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\elements\lib\utils.py", line 145, in _register_element_id
+    raise StreamlitDuplicateElementKey(user_key)
+streamlit.errors.StreamlitDuplicateElementKey: There are multiple elements with the same `key='delete'`. To fix this, please make sure that the `key` argument is unique for each element you create.
+2025-12-02 08:09:51.945 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2025-12-02 08:09:52.070 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2025-12-02 08:09:53.121 Uncaught app execution
+Traceback (most recent call last):
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\runtime\scriptrunner\exec_code.py", line 128, in exec_func_with_error_handling
+    result = func()
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\runtime\scriptrunner\script_runner.py", line 669, in code_to_exec
+    exec(code, module.__dict__)  # noqa: S102
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py", line 118, in <module>
+    logout_user()
+    ~~~~~~~~~~~^^
+  File "C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\login.py", line 72, in logout_user
+    cookie.delete(key)
+    ~~~~~~~~~~~~~^^^^^
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\extra_streamlit_components\CookieManager\__init__.py", line 109, in delete
+    self.cookie_manager(method="delete", cookie=cookie, key=key, default=False)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\components\v1\custom_component.py", line 59, in __call__
+    return self.create_instance(
+           ~~~~~~~~~~~~~~~~~~~~^
+        *args,
+        ^^^^^^
+    ...<4 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\runtime\metrics_util.py", line 443, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\components\v1\custom_component.py", line 216, in create_instance
+    return_value = marshall_component(dg, element)
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\components\v1\custom_component.py", line 176, in marshall_component
+    computed_id = compute_and_register_element_id(
+        "component_instance",
+    ...<9 lines>...
+        special_args=special_args,
+    )
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\elements\lib\utils.py", line 265, in compute_and_register_element_id
+    _register_element_id(ctx, element_type, element_id)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\elements\lib\utils.py", line 145, in _register_element_id
+    raise StreamlitDuplicateElementKey(user_key)
+streamlit.errors.StreamlitDuplicateElementKey: There are multiple elements with the same `key='delete'`. To fix this, please make sure that the `key` argument is unique for each element you create.
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:97: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  df = pd.read_sql_query(query, conn)
+2025-12-02 08:14:34.917 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2025-12-02 08:16:17.211 Uncaught app execution
+Traceback (most recent call last):
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\runtime\scriptrunner\exec_code.py", line 128, in exec_func_with_error_handling
+    result = func()
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\runtime\scriptrunner\script_runner.py", line 669, in code_to_exec
+    exec(code, module.__dict__)  # noqa: S102
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py", line 113, in <module>
+    user = show_login(get_conn)
+  File "C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\login.py", line 107, in show_login
+    save_login(user, remember)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\login.py", line 48, in save_login
+    cookie.set("role", user["role"], expires_at=expires)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\extra_streamlit_components\CookieManager\__init__.py", line 71, in set
+    self.cookie_manager(
+    ~~~~~~~~~~~~~~~~~~~^
+        method="set",
+        ^^^^^^^^^^^^^
+    ...<4 lines>...
+        default=False,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\components\v1\custom_component.py", line 59, in __call__
+    return self.create_instance(
+           ~~~~~~~~~~~~~~~~~~~~^
+        *args,
+        ^^^^^^
+    ...<4 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\runtime\metrics_util.py", line 443, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\components\v1\custom_component.py", line 216, in create_instance
+    return_value = marshall_component(dg, element)
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\components\v1\custom_component.py", line 176, in marshall_component
+    computed_id = compute_and_register_element_id(
+        "component_instance",
+    ...<9 lines>...
+        special_args=special_args,
+    )
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\elements\lib\utils.py", line 265, in compute_and_register_element_id
+    _register_element_id(ctx, element_type, element_id)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\elements\lib\utils.py", line 145, in _register_element_id
+    raise StreamlitDuplicateElementKey(user_key)
+streamlit.errors.StreamlitDuplicateElementKey: There are multiple elements with the same `key='set'`. To fix this, please make sure that the `key` argument is unique for each element you create.
+2025-12-02 08:16:17.281 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:51: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  plant_names = pd.read_sql(
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:56: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  fuel_types = pd.read_sql(
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:61: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  manufacturers = pd.read_sql(
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:97: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  df = pd.read_sql_query(query, conn)
+2025-12-02 10:02:24.979 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2025-12-02 10:02:34.015 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+^C
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://192.168.1.131:8501
+
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:51: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  plant_names = pd.read_sql(
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:56: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  fuel_types = pd.read_sql(
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:61: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  manufacturers = pd.read_sql(
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:66: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  drive_types = pd.read_sql(
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:103: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  df = pd.read_sql_query(query, conn)
+2025-12-02 11:01:13.834 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2025-12-02 11:01:17.397 Uncaught app execution
+Traceback (most recent call last):
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\runtime\scriptrunner\exec_code.py", line 128, in exec_func_with_error_handling
+    result = func()
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\runtime\scriptrunner\script_runner.py", line 669, in code_to_exec
+    exec(code, module.__dict__)  # noqa: S102
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py", line 119, in <module>
+    user = show_login(get_conn)
+  File "C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\login.py", line 107, in show_login
+    save_login(user, remember)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\login.py", line 48, in save_login
+    cookie.set("role", user["role"], expires_at=expires)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\extra_streamlit_components\CookieManager\__init__.py", line 71, in set
+    self.cookie_manager(
+    ~~~~~~~~~~~~~~~~~~~^
+        method="set",
+        ^^^^^^^^^^^^^
+    ...<4 lines>...
+        default=False,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\components\v1\custom_component.py", line 59, in __call__
+    return self.create_instance(
+           ~~~~~~~~~~~~~~~~~~~~^
+        *args,
+        ^^^^^^
+    ...<4 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\runtime\metrics_util.py", line 443, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\components\v1\custom_component.py", line 216, in create_instance
+    return_value = marshall_component(dg, element)
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\components\v1\custom_component.py", line 176, in marshall_component
+    computed_id = compute_and_register_element_id(
+        "component_instance",
+    ...<9 lines>...
+        special_args=special_args,
+    )
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\elements\lib\utils.py", line 265, in compute_and_register_element_id
+    _register_element_id(ctx, element_type, element_id)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Lib\site-packages\streamlit\elements\lib\utils.py", line 145, in _register_element_id
+    raise StreamlitDuplicateElementKey(user_key)
+streamlit.errors.StreamlitDuplicateElementKey: There are multiple elements with the same `key='set'`. To fix this, please make sure that the `key` argument is unique for each element you create.
+2025-12-02 11:01:17.692 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2025-12-02 11:01:20.472 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2025-12-02 11:01:20.873 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:366: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  contact_df = pd.read_sql_query(contact_query, conn, params=plant_params)
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:387: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  drive_df = pd.read_sql_query(drive_query, conn, params=plant_params + drive_params)
+2025-12-02 11:01:21.262 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2025-12-02 11:01:21.320 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2025-12-02 11:01:32.495 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2025-12-02 11:01:33.024 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:366: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  contact_df = pd.read_sql_query(contact_query, conn, params=plant_params)
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:387: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  drive_df = pd.read_sql_query(drive_query, conn, params=plant_params + drive_params)
+2025-12-02 11:01:33.437 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2025-12-02 11:01:33.493 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:51: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  plant_names = pd.read_sql(
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:56: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  fuel_types = pd.read_sql(
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:61: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  manufacturers = pd.read_sql(
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:66: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  drive_types = pd.read_sql(
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:103: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  df = pd.read_sql_query(query, conn)
+2025-12-02 11:07:20.080 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2025-12-02 11:07:29.203 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2025-12-02 11:07:30.082 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:366: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  contact_df = pd.read_sql_query(contact_query, conn, params=plant_params)
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:387: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  drive_df = pd.read_sql_query(drive_query, conn, params=plant_params + drive_params)
+2025-12-02 11:07:30.477 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2025-12-02 11:07:30.537 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2025-12-02 11:07:56.530 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2025-12-02 11:07:57.117 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:366: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  contact_df = pd.read_sql_query(contact_query, conn, params=plant_params)
+C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\test.py:387: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  drive_df = pd.read_sql_query(drive_query, conn, params=plant_params + drive_params)
+2025-12-02 11:07:57.500 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2025-12-02 11:07:57.562 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.

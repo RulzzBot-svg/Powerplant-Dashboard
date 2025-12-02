@@ -12,6 +12,7 @@ import warnings
 from PIL import Image
 from pandas import ExcelWriter
 import xlsxwriter
+from st_aggrid import AgGrid, GridOptionsBuilder
 
 # ------------------------------------------------------
 # Streamlit config (should be one of the first calls)
@@ -43,7 +44,7 @@ def get_conn():
 @st.cache_data(ttl=900)
 def load_filter_data():
     """
-    Load plant names, fuel types, and manufacturers for dropdowns.
+    Load plant names, fuel types, and manufacturers and drive types for dropdowns.
     Tables: general_plant_info, plant_drive_info (mostly static).
     """
     with get_conn() as conn:
@@ -62,12 +63,18 @@ def load_filter_data():
             "WHERE drive_manufacturer IS NOT NULL ORDER BY drive_manufacturer;",
             conn
         )
+        drive_types = pd.read_sql(
+            "SELECT DISTINCT drive_info FROM plant_drive_info "
+            "WHERE drive_info IS NOT NULL ORDER BY drive_info;",
+            conn
+        )
 
     plant_option = ["All"] + plant_names["plantname"].dropna().tolist()
     fuel_options = ["All"] + fuel_types["fuel_type_1"].dropna().tolist()
     manufacturer_options = ["All"] + manufacturers["drive_manufacturer"].dropna().tolist()
+    drive_info_options = ["All"] + drive_types["drive_info"].dropna().tolist()
 
-    return plant_option, fuel_options, manufacturer_options
+    return plant_option, fuel_options, manufacturer_options, drive_info_options
 
 
 @st.cache_data(ttl=120)
@@ -94,6 +101,16 @@ def load_main_plant_summary():
     """
     with get_conn() as conn:
         df = pd.read_sql_query(query, conn)
+        df = df.rename(columns={
+            "plantname": "Plant Name",
+            "ownername": "Owner Name",
+            "company_city": "City",
+            "company_state": "State",
+            "fuel_type_1": "Primary Fuel",
+            "contact_count": "Contacts",
+            "drive_count": "Drives"
+        })
+
     return df
 
 # ------------------------------------------------------
@@ -158,8 +175,8 @@ st.markdown(
 
     /* Hover effect */
     div[role="radiogroup"] > label:hover {
-        border-color: #6A5ACD;
-        box-shadow: 0 0 6px rgba(106, 90, 205, 0.4);
+        border-color: #4A90E2;
+        box-shadow: 0 0 6px rgba(74, 144, 226, 0.4);
     }
     </style>
     """,
@@ -227,7 +244,7 @@ def tab_search_plants():
 
         # Fetch distinct values for dropdowns (CACHED)
         try:
-            plant_option, fuel_options, manufacturer_options = load_filter_data()
+            plant_option, fuel_options, manufacturer_options, drive_info_options = load_filter_data()
         except Exception as e:
             st.error(f"Error loading dropdown data: {e}")
             plant_option, fuel_options, manufacturer_options = ["All"], ["All"], ["All"]
@@ -244,7 +261,7 @@ def tab_search_plants():
         # 2nd row (Drive filters)
         col4, col5, col6 = st.columns(3)
         with col4:
-            drivetype = st.text_input("Drive Type", key="d1")
+            drive_info = st.selectbox("Drive Type",drive_info_options,key="d1")
         with col5:
             drivemanufacturer = st.selectbox("Drive Manufacturer", manufacturer_options, key="d2")
         with col6:
@@ -253,43 +270,36 @@ def tab_search_plants():
         search_btn = st.button("Search Plants", use_container_width=True)
 
     # --- MAIN PLANT LIST (CACHED) ---
-    df = load_main_plant_summary()
 
-    if df.empty:
-        st.warning("empty table boi")
-    else:
-        df = df.rename(columns={
-            "plantname": "Plant Name",
-            "ownername": "Owner Name",
-            "company_city": "City",
-            "company_state": "State",
-            "fuel_type_1": "Primary Fuel Type",
-            "contact_count": "Contacts",
-            "drive_count": "Drives"
-        })
+        df = load_main_plant_summary()
+
         if "contacted_status" not in st.session_state:
             st.session_state.contacted_status = {pid: False for pid in df["plant_id"]}
-        
-        df["Contacted"] = df["plant_id"].apply(lambda pid: st.session_state.contacted_status.get(pid, False))
 
-        edited_df = st.data_editor(
-            df.drop(columns=["plant_id"]),
-            use_container_width=True,
-            hide_index=True,
-            column_config={
-                "Contacted": st.column_config.CheckboxColumn(
-                    "Contacted", help="Mark if you already contacted this plant", default=False
-                )
-            },
-            key="plant_table_editor"
-        )
+        df["Contacted"] = df["plant_id"].map(st.session_state.contacted_status)
 
-        for pid, contacted in zip(df["plant_id"], edited_df["Contacted"]):
-            st.session_state.contacted_status[pid] = contacted
+        with st.form(key="editor_form", clear_on_submit=False):
+            edited_df = st.data_editor(
+                df.drop(columns=["plant_id"]),
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "Contacted": st.column_config.CheckboxColumn("Contacted")
+                },
+                key="plant_editor"
+            )
 
-        total_contacted = sum(st.session_state.contacted_status.values())
-        st.markdown(f"**{total_contacted} plants are marked as contacted**")
+            submitted = st.form_submit_button("Save Changes")
 
+        if submitted:
+            for pid, val in zip(df["plant_id"], edited_df["Contacted"]):
+                st.session_state.contacted_status[pid] = val
+
+        st.write(f"**Total contacted: {sum(st.session_state.contacted_status.values())}**")
+
+
+
+##here last lol
         if st.button("📤 Export Contacted Plants"):
             contacted_df = df[df["plant_id"].isin(
                 [pid for pid, val in st.session_state.contacted_status.items() if val]
@@ -320,9 +330,9 @@ def tab_search_plants():
         plant_params.append(plantfuel)
 
     # ✅ Drive filters
-    if drivetype and drivetype.strip() != "":
-        drive_filters.append("d.drive_type ILIKE %s")
-        drive_params.append(f"%{drivetype}%")
+    if drive_info and drive_info.strip() != "All":
+        drive_filters.append("d.drive_info = %s")
+        drive_params.append(drive_info)
     if drivemanufacturer and drivemanufacturer != "All":
         drive_filters.append("d.drive_manufacturer = %s")
         drive_params.append(drivemanufacturer)
@@ -462,7 +472,6 @@ elif tab == "Outtages":
 # FOOTER
 # ------------------------------------------------------
 st.sidebar.caption("To reset search refresh the page! 🔄")
-st.sidebar.caption("Choose a dark theme or custom theme! So it looks pretty")
 st.sidebar.caption("Made by: Raul Ostorga & Oscar Ostorga")
 
 #
