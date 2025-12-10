@@ -116,14 +116,18 @@ def load_main_plant_summary():
 # ------------------------------------------------------
 # LOGIN
 # ------------------------------------------------------
+if st.session_state.get("logged_out"):
+    st.session_state.clear()
+    
+
+
 user = show_login(get_conn)
 
 # --- Sidebar ---
 st.sidebar.markdown(f"👋 Logged in as **{user['full_name'] or user['username']}** ({user['role']})")
 if st.sidebar.button("🚪 Logout"):
     logout_user()
-    st.experimental_rerun()
-
+    
 # ------------------------------------------------------
 # HEADER
 # ------------------------------------------------------

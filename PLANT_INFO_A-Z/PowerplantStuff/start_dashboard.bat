@@ -1,12 +1,9 @@
 @echo off
-cd /d "C:\Users\AFC5admin\Documents\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff"
+REM Go to project folder
+cd /d "C:\Users\AFC5admin\Documents\POWERPLANTDASHBOARD\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff"
 
-call "C:\Users\AFC5admin\Documents\POWERPLANT-DASHBOARD\PLANT_INFO_A-Z\PowerplantStuff\myenv\Scripts\activate.bat"
+REM Activate virtual environment
+call "C:\Users\AFC5admin\Documents\POWERPLANTDASHBOARD\Powerplant-Dashboard\PLANT_INFO_A-Z\PowerplantStuff\myenv\Scripts\activate.bat"
 
-:loop
-echo Starting Streamlit PowerPlant Dashboard...
-streamlit run test.py >> dashboard_log.txt 2>&1
-
-echo Streamlit stopped or crashed. Restarting in 5 seconds...
-timeout /t 5
-goto loop
+REM Run Streamlit app
+streamlit run test.py --server.address 192.168.1.131 --server.port 8502
