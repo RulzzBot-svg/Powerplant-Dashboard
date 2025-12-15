@@ -13,6 +13,12 @@ from PIL import Image
 from pandas import ExcelWriter
 import xlsxwriter
 from st_aggrid import AgGrid, GridOptionsBuilder
+from dotenv import load_dotenv
+
+load_dotenv()
+
+BASE_DIR = os.path.dirname(__file__)
+LOGO_PATH = os.path.join(BASE_DIR, "powerplant1.svg")
 
 # ------------------------------------------------------
 # Streamlit config (should be one of the first calls)
@@ -29,14 +35,9 @@ warnings.filterwarnings("ignore", category=UserWarning, module="psycopg2")
 # ------------------------------------------------------
 # DB connection
 # ------------------------------------------------------
+conn = psycopg2.connect(os.environ["DATABASE_URL"])
 def get_conn():
-    return psycopg2.connect(
-        host="192.168.1.131",
-        database="PowerPlantDashboard",
-        user="postgres",
-        password="pass123",
-        port=5432
-    )
+    return psycopg2.connect(os.environ["DATABASE_URL"])
 
 # ------------------------------------------------------
 # CACHED LOADERS for Plant Search tab
@@ -135,7 +136,7 @@ col1, col2 = st.columns([1, 1.5])
 with col1:
     st.markdown("# AFC Power Plant Portal")
 with col2:
-    st.image("powerplant1.svg", width=80)
+    st.image(LOGO_PATH, width=80)
 
 st.write("Welcome to the internal plant intelligence and contact system.")
 
